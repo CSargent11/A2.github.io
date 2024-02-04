@@ -48,19 +48,25 @@ class Customer:
         total = self.shopping_cart.calculate_total()
         self.send_email(total)
         return total
-    
+
     def send_email(self, total):
         # Code for sending email
 
-# Create sample products
+    # Create sample products
+        products = {
+            "T-shirt": Product("T-shirt", 10, 5),
+            "Jeans": Product("Jeans", 50, 3),
+            "Shoes": Product("Shoes", 30, 2)
+        }
+
+# Create a customer
+customer = Customer("John", "john@example.com")
+
 products = {
     "T-shirt": Product("T-shirt", 10, 5),
     "Jeans": Product("Jeans", 50, 3),
     "Shoes": Product("Shoes", 30, 2)
 }
-
-# Create a customer
-customer = Customer("John", "john@example.com")
 
 @app.route("/add_to_cart", methods=["POST"])
 def add_to_cart():
