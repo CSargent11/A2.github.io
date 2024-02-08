@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request, redirect, session, url_for
 from flask_restful import Api, Resource, reqparse
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 
 app = Flask(__name__)
@@ -61,8 +63,8 @@ class Product:
 
 products = {
     1 : Product(1, "T-shirt", 10, 5),
-    2 : Product(2, "Jeans", 50, 3),
-    3 : Product(3, "Shoes", 30, 2)
+    2 : Product(2, "Jeans", 50, 4),
+    3 : Product(3, "Shoes", 30, 6)
 }
 
 # Define a dictionary to store the cart data
