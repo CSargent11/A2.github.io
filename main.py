@@ -1,10 +1,10 @@
 from flask import Flask, jsonify, request, redirect, session, url_for
 from flask_restful import Api, Resource, reqparse
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import DataRequired
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+from flask_sslify import SSLify
 
 app = Flask(__name__)
+sslify = SSLify(app)
 app.secret_key = 'your_secret_key'  # Secret key. This would be an environment variable in production.
 
 login_manager = LoginManager()
@@ -27,12 +27,6 @@ def login():
     if request.method == 'POST':
         session['username'] = request.form['username']
         return redirect(url_for('index'))
-    return '''
-        <form method="post">
-            <p><input type=text name=username>
-            <p><input type=submit value=Login>
-        </form>
-    '''
 
 @app.route('/logout')
 def logout():
@@ -71,18 +65,22 @@ products = {
 cart = {}
 
 @app.route("/add-to-cart/<int:product_id>", methods=["POST", "GET"])
-def add_to_cart(product_id):
-    quantity = request.args.get("quantity", type=int)
-    if quantity is None:
-        return jsonify({"error": "Invalid quantity"}), 400
-
- # Add the product and quantity to the cart dictionary
-    if product_id in cart:
-        cart[product_id] += quantity
+def add_to_cart(product_id, quantity=1):
+    # Add the product and quantity to the cart dictionary
+    if product_id not in cart:
+        try:
+            cart[product_id] = Product(product_id, 
+                                       products[product_id].name, 
+                                       products[product_id].price, 
+                                       quantity)
+            return jsonify({"message": "Product added to cart successfully"}), 200
+        except:
+            return jsonify({"message" : "Product not found"})
     else:
-        cart[product_id] = quantity
+        cart[product_id].quantity += quantity
+        return jsonify({"message": "Product added to cart successfully"}), 200
 
-    return jsonify({"message": "Product added to cart successfully"}), 200
+
 
 @app.route("/delete-from-cart/<int:product_id>", methods=["POST", "GET"])
 def delete_from_cart(product_id):
