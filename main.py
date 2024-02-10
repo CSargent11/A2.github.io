@@ -1,44 +1,37 @@
-from flask import Flask, jsonify, request, redirect, session, url_for
+from flask import Flask, jsonify, request, redirect, make_response, session, url_for
 from flask_restful import Api, Resource, reqparse
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_sslify import SSLify
+from werkzeug.datastructures import ImmutableDict
 
 app = Flask(__name__)
 sslify = SSLify(app)
-app.secret_key = 'your_secret_key'  # Secret key. This would be an environment variable in production.
 
-login_manager = LoginManager()
-login_manager.init_app(app)
+# Secret key. This would be an environment variable in production.
+app.secret_key = 'your_secret_key'  
+
 
 @app.route("/")
 def home():
     return "Home"
 
-@app.route("/create-user", methods=["POST","GET"])
-def create_user():
-    user_data = {
-        "name": "Claire",
-        "email": "claire.s@example.com"
-    }
-    return jsonify(user_data)
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        session['username'] = request.form['username']
-        return redirect(url_for('index'))
-
-@app.route('/logout')
-def logout():
-    # remove the username from the session if it's there
-    session.pop('username', None)
-    return redirect(url_for('login'))
-
-@app.route('/profile')
+@app.route("/profile")
 def profile():
     user_id = session.get('user_id')
     username = session.get('username')
-    # ...
+    return "User ID: {user_id}, Username: {username}"
+
+@app.route("/create-user", methods=["POST", "GET"])
+def create_user():
+    username = request.form.get("username")
+    user_email = request.args.get("user_email")
+
+    user_data = ImmutableDict({
+        "name": username,
+        "email": user_email
+    })
+    return jsonify(user_data)
+
 
 @app.route("/products/<int:product_id>")
 def view_product(product_id):
@@ -55,17 +48,21 @@ class Product:
         self.price = price
         self.quantity = quantity
 
+#product dictionary
 products = {
     1 : Product(1, "T-shirt", 10, 5),
     2 : Product(2, "Jeans", 50, 4),
     3 : Product(3, "Shoes", 30, 6)
 }
 
-# Define a dictionary to store the cart data
+# Cart dictionary to store cart data
 cart = {}
 
 @app.route("/add-to-cart/<int:product_id>", methods=["POST", "GET"])
-def add_to_cart(product_id, quantity=1):
+def add_to_cart(product_id):
+    # get the desired quantity from user post request
+    quantity = request.args.get("quantity", type=int)
+    
     # Add the product and quantity to the cart dictionary
     if product_id not in cart:
         try:
@@ -73,14 +70,16 @@ def add_to_cart(product_id, quantity=1):
                                        products[product_id].name, 
                                        products[product_id].price, 
                                        quantity)
-            return jsonify({"message": "Product added to cart successfully"}), 200
+            return jsonify({"message": "Product added to cart successfully",
+                            "product_id" : product_id,
+                            "quantity" : quantity}), 200
         except:
             return jsonify({"message" : "Product not found"})
     else:
         cart[product_id].quantity += quantity
-        return jsonify({"message": "Product added to cart successfully"}), 200
-
-
+        return jsonify({"message": "Product added to cart successfully",
+                            "product_id" : product_id,
+                            "quantity" : quantity}), 200
 
 @app.route("/delete-from-cart/<int:product_id>", methods=["POST", "GET"])
 def delete_from_cart(product_id):
