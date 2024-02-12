@@ -1,5 +1,3 @@
-Readme file
-
 Flask Modular Application:
 This is a simple Flask application organised into different files for better code structure. The application includes user authentication, product management, and a shopping cart.
 
