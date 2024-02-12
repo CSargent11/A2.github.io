@@ -1,3 +1,4 @@
+#main.py
 from flask import Flask, jsonify, request, redirect, make_response, session, url_for
 from flask_restful import Api, Resource, reqparse
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
@@ -7,7 +8,6 @@ from Crypto.Protocol.KDF import PBKDF2
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
 from Crypto.Util.Padding import pad, unpad
-from app import app
 
 app = Flask(__name__)
 sslify = SSLify(app)
@@ -126,4 +126,4 @@ def create_user():
     '''
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
