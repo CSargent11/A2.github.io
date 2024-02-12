@@ -1,3 +1,4 @@
+#app.py
 from flask import Flask, jsonify, request, redirect, make_response, session, url_for
 from flask_restful import Api, Resource, reqparse
 from flask_sslify import SSLify
@@ -7,8 +8,8 @@ app = Flask(__name__)
 sslify = SSLify(app)
 
 # Display product information
-@app.route("/products/<int:product_id>")
-def view_product(product_id):
+@app.route("/products/<int:product_id>", methods=['GET'])
+def get_product(product_id):
     product_name = products.get(product_id).name
     product_price = products.get(product_id).price
     product_quant = products.get(product_id).quantity
@@ -75,4 +76,4 @@ def delete_from_cart(product_id):
     return jsonify({"message": "Product removed from cart successfully"}), 200
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)
